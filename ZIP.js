@@ -23,6 +23,19 @@ ZIP.prototype.addFile = function(rpgFile) {
 	this.files.push(rpgFile);
 };
 
+var saveData =
+	window.navigator.msSaveBlob ||
+	function (blob, fileName)
+{
+	var a = document.createElement("a");
+    a.style = "display: none";
+	a.href = window.URL.createObjectURL(blob);
+	a.download = fileName || '';
+	a.click();
+	a.remove();
+	window.URL.revokeObjectURL(url);
+};
+
 /**
  * Turns all Files into a ZIP-File and Download it
  */
@@ -42,10 +55,12 @@ ZIP.prototype.save = function() {
 	}
 
 	// Download ZIP
-	if(addedFiles > 0)
-		jsZip.generateAsync({type:"base64"}).then(function (base64) {
-			location.href="data:application/zip;base64," + base64;
+	if(addedFiles > 0) {
+		var fileName = this.files[0].name + '.zip';
+		jsZip.generateAsync({type:'blob'}).then(function(blob) {
+			saveData(blob, fileName);
 		});
+	}
 	else
 		alert('Can\'t offer ZIP-Download. ZIP would be empty...');
 };
